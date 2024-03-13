@@ -1,3 +1,4 @@
+
 name: Build and scan
 
 on:
@@ -9,8 +10,8 @@ on:
       - '**'
 
 env:
-   DOCKER_REPOSITORY: iheanyiorg # name of Docker Hub Org ID
-   IMAGE_NAME: workshop-insecure
+   DOCKER_REPOSITORY: <dockerhub org name> # name of Docker Hub Org ID
+   IMAGE_NAME: workshop-node-app
    IMAGE_TAG: ${{ github.run_number }} 
 
 jobs:
