@@ -7,6 +7,12 @@ on:
   pull_request:
     branches: 
       - []
+
+env:
+   DOCKER_REPOSITORY: <dockerhub-org> # name of Docker Hub Org ID
+   IMAGE_NAME: insecure-bank-workshop
+   IMAGE_TAG: ${{ github.run_number }} 
+
 jobs:
   aqua:
     name: Aqua Code Scan 
@@ -40,4 +46,15 @@ jobs:
           context: .
           file: ./Dockerfile
           push: true
-          tags: <dockerhub-org>/insecure-bank-workshop:1.0
+          tags: $DOCKER_REPOSITORY/$IMAGE_NAME:$IMAGE_TAG
+
+      - name: Login to Aqua Registry
+        uses: docker/login-action@v1
+        with:
+          registry: registry.aquasec.com
+          username: ${{ secrets.AQUA_REGISTRY_USERNAME }}
+          password: ${{ secrets.AQUA_REGISTRY_PASS }}
+          
+      - name: Scan Container Image with Trivy
+        run: |
+          docker run -e BUILD_JOB_NAME=$IMAGE_NAME -e BUILD_NUMBER=$IMAGE_TAG --rm -v /var/run/docker.sock:/var/run/docker.sock registry.aquasec.com/scanner:2022.4 scan --host ${{ secrets.AQUA_HOST }} --local $DOCKER_REPOSITORY/$IMAGE_NAME:$IMAGE_TAG --token ${{ secrets.AQUA_TOKEN }} --layer-vulnerabilities --no-verify
